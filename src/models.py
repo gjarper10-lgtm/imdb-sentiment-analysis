@@ -11,7 +11,9 @@ def _embedding(vocab_size, embeddings, freeze):
     if embeddings is not None:
         return nn.Embedding.from_pretrained(torch.as_tensor(embeddings), freeze=freeze,
                                             padding_idx=C.PAD_IDX)
-    return nn.Embedding(vocab_size, C.EMBED_DIM, padding_idx=C.PAD_IDX)
+    embedding = nn.Embedding(vocab_size, C.EMBED_DIM, padding_idx=C.PAD_IDX)
+    embedding.weight.requires_grad_(not freeze)
+    return embedding
 
 
 class MLPBoW(nn.Module):
@@ -46,7 +48,15 @@ class TextCNN(nn.Module):
         if ids.size(1) < self.max_k:                       # very short reviews
             ids = F.pad(ids, (0, self.max_k - ids.size(1)), value=C.PAD_IDX)
         x = self.embedding(ids).transpose(1, 2)            # [B, E, T]
-        pooled = [F.relu(conv(x)).amax(dim=2) for conv in self.convs]
+        if lengths is None:
+            lengths = (ids != C.PAD_IDX).sum(dim=1).clamp_min(1)
+        pooled = []
+        for conv in self.convs:
+            activations = F.relu(conv(x))
+            # Exclude padded windows so predictions do not depend on batch mates.
+            valid = (lengths.to(ids.device) - conv.kernel_size[0] + 1).clamp_min(1)
+            mask = torch.arange(activations.size(2), device=ids.device)[None, :] < valid[:, None]
+            pooled.append(activations.masked_fill(~mask[:, None, :], float('-inf')).amax(dim=2))
         return self.fc(self.dropout(torch.cat(pooled, dim=1))).squeeze(-1)
 
 
@@ -83,10 +93,11 @@ class BiLSTMAttention(nn.Module):
 class DistilBERTClassifier(nn.Module):
     """Pre-trained DistilBERT (base, uncased) fine-tuned end to end with a single-logit head."""
 
-    def __init__(self, model_name="distilbert-base-uncased"):
+    def __init__(self, model_name="distilbert/distilbert-base-uncased", config=None):
         super().__init__()
         from transformers import AutoModelForSequenceClassification
-        self.model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=1)
+        self.model = (AutoModelForSequenceClassification.from_config(config) if config is not None
+                      else AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=1))
 
     def forward(self, input_ids, attention_mask):
         return self.model(input_ids=input_ids, attention_mask=attention_mask).logits.squeeze(-1)

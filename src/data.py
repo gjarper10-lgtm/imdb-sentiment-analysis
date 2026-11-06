@@ -1,6 +1,8 @@
 """Dataset loading, the shared preprocessing pipeline, and per-model DataLoaders."""
 import random
 import re
+import hashlib
+import html
 from collections import Counter
 
 import numpy as np
@@ -25,7 +27,7 @@ def set_seed(seed: int = C.SEED):
 
 def clean_text(text: str) -> str:
     """Lowercase, strip HTML line breaks and punctuation, collapse whitespace."""
-    text = _HTML.sub(" ", text.lower())
+    text = _HTML.sub(" ", html.unescape(text).lower())
     text = text.replace("'", "")            # don't -> dont, keeps negations as one token
     text = _NON_ALNUM.sub(" ", text)
     return _WS.sub(" ", text).strip()
@@ -47,7 +49,9 @@ def load_splits(subset: int | None = None, seed: int = C.SEED):
     texts = list(ds["train"]["text"]) + list(ds["test"]["text"])
     labels = np.array(list(ds["train"]["label"]) + list(ds["test"]["label"]), dtype=np.int64)
 
-    if subset and subset < len(texts):
+    if subset is not None and (subset < 20 or subset > len(texts)):
+        raise ValueError(f"subset must be between 20 and {len(texts)}")
+    if subset is not None and subset < len(texts):
         idx, _ = train_test_split(np.arange(len(texts)), train_size=subset,
                                   stratify=labels, random_state=seed)
         texts = [texts[i] for i in idx]
@@ -64,6 +68,18 @@ def load_splits(subset: int | None = None, seed: int = C.SEED):
     return {"train": pick(train_idx), "val": pick(val_idx), "test": pick(test_idx)}
 
 
+def split_fingerprint(splits):
+    """Hash ordered texts/labels to prevent comparisons between different splits."""
+    digest = hashlib.sha256()
+    for name, (texts, labels) in splits.items():
+        digest.update(name.encode())
+        for text, label in zip(texts, labels):
+            payload = f"{int(label)}:{text}".encode('utf-8')
+            digest.update(len(payload).to_bytes(8, 'big'))
+            digest.update(payload)
+    return digest.hexdigest()
+
+
 # ---------------------------------------------------------------- vocabulary
 
 class Vocab:
@@ -77,6 +93,8 @@ class Vocab:
 
     def encode(self, texts, max_len: int = C.MAX_LEN):
         """Map to ids, truncate/pad to max_len. Returns (ids[N, max_len], lengths[N])."""
+        if max_len < 1:
+            raise ValueError('max_len must be positive')
         ids = np.full((len(texts), max_len), C.PAD_IDX, dtype=np.int64)
         lengths = np.zeros(len(texts), dtype=np.int64)
         for row, text in enumerate(texts):
@@ -104,14 +122,15 @@ def _loader(n, collate, batch_size, shuffle):
                       collate_fn=collate, num_workers=0)
 
 
-def tfidf_loaders(splits, batch_size):
+def tfidf_loaders(splits, batch_size, max_len=C.MAX_LEN):
     """MLP baseline: sparse TF-IDF vectors (fit on train only), densified per batch."""
     vec = TfidfVectorizer(max_features=C.VOCAB_SIZE, tokenizer=tokenize,
                           token_pattern=None, lowercase=False, sublinear_tf=True,
                           dtype=np.float32)
-    mats = {"train": vec.fit_transform(splits["train"][0])}
+    clipped = {s: [' '.join(tokenize(t)[:max_len]) for t in v[0]] for s, v in splits.items()}
+    mats = {"train": vec.fit_transform(clipped["train"])}
     for s in ("val", "test"):
-        mats[s] = vec.transform(splits[s][0])
+        mats[s] = vec.transform(clipped[s])
 
     def make(split, shuffle):
         X, y = mats[split], splits[split][1]
@@ -120,7 +139,7 @@ def tfidf_loaders(splits, batch_size):
         return _loader(len(y), collate, batch_size, shuffle)
 
     loaders = {s: make(s, s == "train") for s in splits}
-    return loaders, {"input_dim": len(vec.vocabulary_)}
+    return loaders, {"input_dim": len(vec.vocabulary_), "vectorizer": vec}
 
 
 def sequence_loaders(splits, batch_size, max_len=C.MAX_LEN):
@@ -144,7 +163,7 @@ def sequence_loaders(splits, batch_size, max_len=C.MAX_LEN):
 
 
 def bert_loaders(splits, batch_size, max_len=C.MAX_LEN,
-                 model_name="distilbert-base-uncased"):
+                 model_name="distilbert/distilbert-base-uncased"):
     """DistilBERT: WordPiece tokenisation of the same cleaned text, dynamic padding."""
     from transformers import AutoTokenizer
 

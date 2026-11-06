@@ -3,6 +3,8 @@
     python -m src.eda
 """
 import json
+import argparse
+from pathlib import Path
 from collections import Counter
 
 import matplotlib
@@ -15,7 +17,10 @@ from .data import load_splits, tokenize
 
 
 def main():
-    out = C.RESULTS_DIR / "eda"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output-root', type=Path, default=C.RESULTS_DIR)
+    args = parser.parse_args()
+    out = args.output_root / "eda"
     out.mkdir(parents=True, exist_ok=True)
     splits = load_splits()
     texts = [t for s in splits.values() for t in s[0]]
@@ -47,6 +52,7 @@ def main():
     ax.legend()
     fig.tight_layout()
     fig.savefig(out / "length_distribution.png", dpi=150)
+    plt.close(fig)
 
     # Most class-indicative words (log-odds ratio with add-one smoothing) on the train split.
     pos = Counter(w for t, y in zip(*splits["train"]) if y == 1 for w in set(tokenize(t)))

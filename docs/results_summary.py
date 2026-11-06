@@ -20,7 +20,13 @@ def load():
     eda_f = RESULTS / "eda" / "eda_stats.json"
     eda = json.loads(eda_f.read_text()) if eda_f.exists() else None
     complete = all(runs.values())
-    full = complete and all(r.get("subset") is None for r in runs.values())
+    compatible = complete and len({(r.get('split_fingerprint'), r.get('max_len')) for r in runs.values()}) == 1
+    full = compatible and all(r.get("subset") is None and r.get('max_len') == 512
+                              and r.get('split_sizes') == {'train': 35000, 'val': 7500, 'test': 7500}
+                              for r in runs.values())
+    full = full and all(runs[m].get('glove') for m in ['textcnn', 'bilstm'])
+    if complete and not compatible:
+        raise ValueError('Report refuses to compare runs with different split fingerprints or token limits')
     return runs, eda, complete, full
 
 
@@ -62,7 +68,7 @@ def findings(runs):
     cnn_share = acc["textcnn"] / acc["distilbert"] * 100
     return [
         f"{SHORT[best]} achieved the highest test accuracy ({acc[best] * 100:.2f}%).",
-        f"The strongest model trained from scratch was {SHORT[scratch_best]} "
+        f"The strongest non-transformer model was {SHORT[scratch_best]} "
         f"({acc[scratch_best] * 100:.2f}%); the fine-tuned transformer "
         f"{'outperformed' if gap > 0 else 'trailed'} it by {abs(gap):.2f} percentage points.",
         f"TextCNN reached {cnn_share:.1f}% of DistilBERT's accuracy with "
@@ -72,6 +78,20 @@ def findings(runs):
         f"{ttime['mlp'] / 60:.1f} min, versus {ttime['distilbert'] / 60:.1f} min for DistilBERT "
         f"fine-tuning.",
     ]
+
+
+def hyperparameter_rows(runs):
+    output = []
+    for name in ORDER:
+        r = runs[name]
+        if not r:
+            output.append([SHORT[name]] + [TBD] * 5)
+            continue
+        hp = r['hyperparameters']
+        batch = str(hp['batch_size']) + (f" x {hp['grad_accum']}" if hp.get('grad_accum', 1) > 1 else '')
+        output.append([SHORT[name], f"{hp['lr']:g}", batch, str(hp['epochs']), str(hp['patience']),
+                       f"best epoch {r['best_epoch']}"])
+    return output
 
 
 if __name__ == "__main__":

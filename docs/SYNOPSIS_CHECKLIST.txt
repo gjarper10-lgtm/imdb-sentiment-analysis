@@ -1,0 +1,48 @@
+SYNOPSIS IMPLEMENTATION CHECKLIST
+Arnav Kumar | 230911308 | ICT-4442
+
+The supplied ZIP already contained all four model definitions, common data loaders,
+training code and draft report/slides. It contained no trained weights or results.
+
+Implemented / corrected in this working copy:
+- Shared cleaned raw-text IMDB data, stratified 70/15/15 split, seed 42.
+- Training-only TF-IDF and vocabulary; 512-word truncation also applied to the MLP.
+- MLP, GloVe-300 TextCNN (kernels 2,3,4), stacked attention BiLSTM, DistilBERT.
+- TextCNN masking prevents batch padding from changing a review's prediction.
+- Gradient accumulation handles partial batches and incomplete groups correctly.
+- Validation-only learning-rate search; only the selected checkpoint sees test labels.
+- Saved weights AND fitted preprocessing; prediction CLI for new reviews.
+- Metrics, confusion matrices, ROC, measured error examples and length-group errors.
+- Training/search times, parameter counts and warmed-up inference timing.
+- Same-split fingerprint checks before comparison; smoke results kept separately.
+- Data-driven report and presentation generators; offline regression tests.
+- Portable experiment notebook and reproducibility instructions.
+
+Evidence after running:
+  results/<model>/metrics.json          final test evaluation
+  results/tuning/<model>_selection.json  all validation trials and chosen trial
+  results/<model>/model.pt              trained checkpoint
+  results/<model>/bundle.json           preprocessing/model metadata
+  results/analysis.json                 measured error/cost analysis
+  docs/Project_Report.docx              report regenerated from those results
+  docs/Project_Presentation.pptx        slides regenerated from those results
+  docs/verification.json                executed checks and completion status
+
+Methodological clarifications:
+1. DistilBERT retains its pretrained WordPiece vocabulary, not the 10,000-word
+   vocabulary of the word-level models. Its 512-token limit includes special tokens.
+2. GloVe is pretrained. CNN/BiLSTM are non-transformer models with pretrained word
+   embeddings, not entirely from-scratch systems.
+3. The raw HuggingFace dataset is used instead of combining the already-tokenized
+   Keras variant with raw reviews. All models use identical review identities.
+4. A shared PyTorch training loop implements the proposed fine-tuning instead of
+   HuggingFace Trainer. It keeps loss/selection/timing comparable across architectures.
+5. The 70/15/15 pooled split follows the synopsis but differs from the official
+   Stanford test split. Scores must not be claimed as directly comparable leaderboard results.
+6. Two learning rates and a limited epoch budget are a modest search, not an exhaustive one.
+7. Latency excludes tokenization. All timing depends on hardware and batching.
+
+External submission work:
+The synopsis asks for a GitHub repository with commit history. Local deliverables
+do not prove publication to GitHub. A destination repository/account is needed for
+publishing; no remote URL, historic commits or submission status is fabricated.

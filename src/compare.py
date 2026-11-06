@@ -14,10 +14,14 @@ from . import config as C
 
 def load_results():
     rows = []
+    fingerprints = set()
     order = lambda f: (C.MODELS.index(f.parent.name.split("_")[0])
                        if f.parent.name.split("_")[0] in C.MODELS else 99, f.parent.name)
     for f in sorted(C.RESULTS_DIR.glob("*/metrics.json"), key=order):
         r = json.loads(f.read_text())
+        if r.get('split_fingerprint') is None:
+            raise ValueError(f'{f}: missing split provenance; rerun with the current pipeline')
+        fingerprints.add((r['split_fingerprint'], r['max_len']))
         rows.append({
             "run": f.parent.name, "model": r["display_name"],
             "accuracy": r["test"]["accuracy"], "precision": r["test"]["precision"],
@@ -27,7 +31,11 @@ def load_results():
             "ms_per_review_single": r["latency_ms_single_review"],
             "ms_per_review_batched": r["latency_ms_per_review_batched"],
             "subset": r.get("subset"),
+            'validation_f1': r['validation_f1'],
+            'search_train_time_min': r.get('selection', {}).get('total_search_train_time_s', r['train_time_s']) / 60,
         })
+    if len(fingerprints) > 1:
+        raise ValueError('Mixed data splits or truncation settings: use separate output roots for separate experiments')
     return pd.DataFrame(rows)
 
 
@@ -42,6 +50,7 @@ def plot_curves(out):
     axes[1].legend()
     fig.tight_layout()
     fig.savefig(out / "learning_curves.png", dpi=150)
+    plt.close(fig)
 
 
 def main():
@@ -75,6 +84,7 @@ def main():
     fig.suptitle("Accuracy vs. cost on IMDB (common protocol)")
     fig.tight_layout()
     fig.savefig(out / "tradeoffs.png", dpi=150)
+    plt.close(fig)
     plot_curves(out)
     print(f"\nsaved comparison.md / comparison.csv / tradeoffs.png / learning_curves.png to {out}")
 

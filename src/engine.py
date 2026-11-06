@@ -1,6 +1,7 @@
 """Training loop and evaluation harness shared by all four models."""
 import copy
 import time
+import math
 
 import numpy as np
 import torch
@@ -10,7 +11,7 @@ from tqdm import tqdm
 
 
 def _to(inputs, device):
-    return {k: v.to(device, non_blocking=True) for k, v in inputs.items()}
+    return {k: (v if k == 'lengths' else v.to(device, non_blocking=True)) for k, v in inputs.items()}
 
 
 def _sync(device):
@@ -43,12 +44,14 @@ def predict(model, loader, device, amp=True):
 
 
 def train(model, loaders, device, *, lr, epochs, patience, weight_decay=0.0,
-          grad_accum=1, warmup_frac=0.0, amp=True, clip=1.0):
+          grad_accum=1, warmup_frac=0.0, amp=True, clip=1.0, progress_path=None):
     """Train with AdamW; keep the weights with the best validation F1 (early stopping)."""
+    if min(epochs, patience, grad_accum) < 1:
+        raise ValueError('epochs, patience and grad_accum must be positive')
     model.to(device)
     opt = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad],
                             lr=lr, weight_decay=weight_decay)
-    total_steps = max(1, epochs * len(loaders["train"]) // grad_accum)
+    total_steps = epochs * math.ceil(len(loaders["train"]) / grad_accum)
     warmup = int(warmup_frac * total_steps)
     sched = None
     if warmup_frac > 0:   # linear warmup then linear decay (transformer fine-tuning recipe)
@@ -65,18 +68,26 @@ def train(model, loaders, device, *, lr, epochs, patience, weight_decay=0.0,
         model.train()
         t0, running, seen = time.perf_counter(), 0.0, 0
         opt.zero_grad(set_to_none=True)
+        accumulated_samples = 0
         bar = tqdm(loaders["train"], desc=f"epoch {epoch}/{epochs}", leave=False)
         for step, (inputs, y) in enumerate(bar, 1):
             inputs, y = _to(inputs, device), y.to(device)
             with torch.autocast(device.type, dtype=torch.float16, enabled=use_amp):
                 loss = loss_fn(model(**inputs).float(), y)
-            scaler.scale(loss / grad_accum).backward()
+            # Sum losses then normalise by the actual number of samples, including
+            # the final partial batch / accumulation group.
+            scaler.scale(loss * len(y)).backward()
+            accumulated_samples += len(y)
             if step % grad_accum == 0 or step == len(loaders["train"]):
                 scaler.unscale_(opt)
+                for parameter in model.parameters():
+                    if parameter.grad is not None:
+                        parameter.grad.div_(accumulated_samples)
                 nn.utils.clip_grad_norm_(model.parameters(), clip)
                 scaler.step(opt)
                 scaler.update()
                 opt.zero_grad(set_to_none=True)
+                accumulated_samples = 0
                 if sched:
                     sched.step()
             running += loss.item() * len(y)
@@ -94,12 +105,17 @@ def train(model, loaders, device, *, lr, epochs, patience, weight_decay=0.0,
               f"val_acc={val['accuracy']:.4f} val_f1={val['f1']:.4f} ({epoch_time:.1f}s)")
 
         if val["f1"] > best_f1:
-            best_f1, best_state, bad_epochs = val["f1"], copy.deepcopy(model.state_dict()), 0
+            best_f1, bad_epochs = val["f1"], 0
+            best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
         else:
             bad_epochs += 1
             if bad_epochs >= patience:
                 print(f"early stopping (no val F1 gain for {patience} epochs)")
                 break
+
+        if progress_path is not None:
+            import json
+            progress_path.write_text(json.dumps(history, indent=2), encoding='utf-8')
 
     train_time = time.perf_counter() - train_start
     model.load_state_dict(best_state)
@@ -113,6 +129,11 @@ def measure_latency(model, loader, device, n_single=200, amp=True):
     use_amp = amp and device.type == "cuda"
     ctx = lambda: torch.autocast(device.type, dtype=torch.float16, enabled=use_amp)
 
+    for i, (inputs, _) in enumerate(loader):
+        with ctx():
+            model(**_to(inputs, device))
+        if i >= 2:
+            break
     _sync(device)
     t0, n = time.perf_counter(), 0
     for inputs, y in loader:
@@ -140,10 +161,13 @@ def measure_latency(model, loader, device, n_single=200, amp=True):
         with ctx():
             model(**_to(one, device))
     _sync(device)
+    measured = singles[10:] or singles
     t0 = time.perf_counter()
-    for one in singles[10:]:
+    for one in measured:
         with ctx():
             model(**_to(one, device))
         _sync(device)
-    single_ms = (time.perf_counter() - t0) * 1000 / max(1, len(singles) - 10)
-    return {"latency_ms_per_review_batched": batched_ms, "latency_ms_single_review": single_ms}
+    single_ms = (time.perf_counter() - t0) * 1000 / max(1, len(measured))
+    return {"latency_ms_per_review_batched": batched_ms, "latency_ms_single_review": single_ms,
+            "latency_single_samples": len(measured),
+            "latency_scope": "pretokenized input, includes loader and device transfer; excludes tokenization"}

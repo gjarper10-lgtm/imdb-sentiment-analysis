@@ -1,9 +1,9 @@
 # Install PyTorch first for your GPU, e.g. (CUDA 12.8):
 #   pip install torch --index-url https://download.pytorch.org/whl/cu128
 torch>=2.6
-transformers>=4.45
-datasets>=3.0
-scikit-learn>=1.5
+transformers>=4.45,<5
+datasets>=3.0,<4
+scikit-learn>=1.5,<2
 numpy
 pandas
 matplotlib
@@ -11,3 +11,6 @@ tabulate
 tqdm
 python-docx
 python-pptx
+joblib
+pytest
+reportlab

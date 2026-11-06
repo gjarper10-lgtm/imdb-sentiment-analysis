@@ -14,7 +14,7 @@ from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
 from pptx.util import Emu, Inches, Pt
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from results_summary import HEADER, ORDER, RESULTS, SHORT, findings, load, rows  # noqa: E402
+from results_summary import HEADER, ORDER, RESULTS, SHORT, findings, load, rows, hyperparameter_rows  # noqa: E402
 
 OUT = Path(__file__).resolve().parent / "Project_Presentation.pptx"
 
@@ -338,11 +338,7 @@ def build():
     s = new_slide(prs)
     n += 1
     title(s, "Training setup")
-    data = [["Model", "LR", "Batch", "Max epochs", "Patience", "Notes"],
-            ["MLP (TF-IDF)", "1e-3", "64", "10", "3", "weight decay 1e-5"],
-            ["TextCNN", "1e-3", "64", "10", "3", "weight decay 1e-5"],
-            ["BiLSTM + Attention", "1e-3", "64", "10", "3", "weight decay 1e-5"],
-            ["DistilBERT", "2e-5", "8 × 2 accum.", "3", "2", "10% warm-up, linear decay"]]
+    data = [["Model", "LR", "Batch", "Epoch cap", "Patience", "Selected"]] + hyperparameter_rows(runs)
     tbl = s.shapes.add_table(len(data), len(data[0]), MARGIN, Inches(1.7), Inches(8.2),
                              Inches(2.9)).table
     widths = [2.1, 0.8, 1.4, 1.2, 1.0, 1.7]
@@ -398,7 +394,7 @@ def build():
     note = ("Cells marked TBD are filled automatically: run python run_all.py, then "
             "python docs/build_slides.py." if not complete else
             "Reduced-data run (--subset): for pipeline verification only." if not full else
-            "Test split: 7,500 reviews; latency = one review at a time on the GPU.")
+            "7,500 test reviews; pretokenized latency. Custom split: not an official leaderboard score.")
     text(s, MARGIN, Inches(5.1), W - 2 * MARGIN, Inches(0.5), note, size=14, italic=True,
          color=MUTED)
     footer(s, n)
@@ -457,10 +453,10 @@ def build():
         ("Error analysis", {"size": 20, "bold": True, "font": HEAD, "after": 10}),
         ("50 most confident mistakes per model, saved to misclassified.csv", {"after": 12,
                                                                               "color": MUTED}),
-        ("Mixed reviews (praise + criticism)", {"after": 6}),
-        ("Sarcasm and irony", {"after": 6}),
+        ("Candidate causes to inspect:", {"after": 6}),
+        ("Mixed sentiment, sarcasm, irony", {"after": 6}),
         ("Verdict in the truncated tail", {"after": 6}),
-        ("Negative plot, positive verdict", {}),
+        ("See measured errors in the report", {}),
     ], size=15)
     footer(s, n)
 
@@ -469,8 +465,8 @@ def build():
     n += 1
     title(s, "Conclusion and future work", dark=True)
     bullets(s, MARGIN, Inches(1.8), Inches(6.0), Inches(4.5), [
-        "Four architecture families implemented and compared under one preprocessing pipeline "
-        "and one evaluation harness.",
+        "Four architecture families share one preprocessing pipeline "
+        "and one evaluation harness; conclusions depend on completed runs.",
         "The comparison quantifies what each inductive bias buys in accuracy and costs in "
         "parameters, training time and latency.",
         "Gives practical guidance for choosing a model under a compute budget.",

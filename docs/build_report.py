@@ -3,6 +3,7 @@
     python docs/build_report.py
 """
 import sys
+import json
 from pathlib import Path
 
 from docx import Document
@@ -14,7 +15,7 @@ from docx.oxml.ns import qn
 from docx.shared import Cm, Pt, RGBColor
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from results_summary import HEADER, RESULTS, TBD, findings, load, rows  # noqa: E402
+from results_summary import HEADER, RESULTS, TBD, findings, load, rows, hyperparameter_rows  # noqa: E402
 
 OUT = Path(__file__).resolve().parent / "Project_Report.docx"
 ACCENT = RGBColor(0x1F, 0x3A, 0x5F)
@@ -171,7 +172,7 @@ def title_page(doc):
     for _ in range(3):
         doc.add_paragraph()
     para(doc, TITLE, bold=True, size=20, align=WD_ALIGN_PARAGRAPH.CENTER, after=18)
-    para(doc, "Final Report on", size=13, align=WD_ALIGN_PARAGRAPH.CENTER, after=2)
+    para(doc, "Project Report on", size=13, align=WD_ALIGN_PARAGRAPH.CENTER, after=2)
     para(doc, "Deep Learning Project [ICT-4442]", bold=True, size=14,
          align=WD_ALIGN_PARAGRAPH.CENTER, after=40)
     para(doc, "Submitted By", italic=True, size=12, align=WD_ALIGN_PARAGRAPH.CENTER, after=2)
@@ -180,7 +181,7 @@ def title_page(doc):
     for line in ("SCHOOL OF COMPUTER ENGINEERING", "MANIPAL INSTITUTE OF TECHNOLOGY",
                  "MANIPAL ACADEMY OF HIGHER EDUCATION"):
         para(doc, line, bold=True, size=13, align=WD_ALIGN_PARAGRAPH.CENTER, after=2)
-    para(doc, "October 2026", size=12, align=WD_ALIGN_PARAGRAPH.CENTER, after=0)
+    para(doc, "November 2026", size=12, align=WD_ALIGN_PARAGRAPH.CENTER, after=0)
     page_break(doc)
 
 
@@ -190,6 +191,8 @@ def build():
     setup_styles(doc)
     page_numbers(doc.sections[0])
     title_page(doc)
+    if not full:
+        para(doc, "EXPERIMENTS INCOMPLETE: this is a progress report, not a completed benchmark.", bold=True)
 
     # Abstract
     doc.add_heading("Abstract", 1)
@@ -206,7 +209,7 @@ def build():
          "time and inference latency. "
          f"Test accuracies were: MLP {acc('mlp')}, TextCNN {acc('textcnn')}, BiLSTM-Attention "
          f"{acc('bilstm')} and DistilBERT {acc('distilbert')}. The study quantifies the "
-         "accuracy gap between models trained from scratch and a pre-trained transformer, and "
+         "accuracy gap between non-transformer models and a pre-trained transformer, and "
          "the compute cost at which that gap is bought.")
     para(doc, "Keywords: sentiment analysis, IMDB, TextCNN, BiLSTM, attention, DistilBERT, "
               "transfer learning, model comparison", italic=True, size=11)
@@ -246,7 +249,7 @@ def build():
     body(doc,
          "Sentiment analysis of product and entertainment reviews supports consumer decision "
          "making at very large scale. IMDB is the standard benchmark for binary sentiment, so "
-         "results are directly comparable with more than a decade of published work. The four "
+         "our pooled 70/15/15 split differs from the official split and does not permit direct leaderboard comparisons. The four "
          "architectures studied span the practical range of compute budgets, from a model that "
          "trains in seconds on a CPU to one that needs a GPU for fine-tuning. For deployment "
          "settings such as embedded review analysers or on-device NLP, knowing how close a small "
@@ -269,7 +272,7 @@ def build():
          "and fine-tuning it with discriminative learning rates substantially outperforms "
          "training from scratch on sentiment tasks, including IMDB."),
         ("Devlin et al. (2019) [3]. ", "BERT's masked-language-model pre-training and "
-         "fine-tuning reached above 95% accuracy on IMDB, defining the modern transfer-learning "
+         "fine-tuning established a general transfer-learning approach for NLP, motivating the transformer "
          "baseline. RoBERTa later improved on BERT through better pre-training choices."),
         ("Sanh et al. (2019) [5]. ", "DistilBERT used knowledge distillation to produce a model "
          "40% smaller and 60% faster than BERT-base while retaining about 97% of its language "
@@ -365,13 +368,24 @@ def build():
          "The same evaluation harness computes accuracy, precision, recall, F1 and the confusion "
          "matrix, counts parameters, records wall-clock training time and measures inference "
          "latency both for single reviews and batched over the test set.")
-    table(doc, ["Model", "Learning rate", "Batch size", "Max epochs", "Patience", "Other"], [
-        ["MLP (TF-IDF)", "1e-3", "64", "10", "3", "weight decay 1e-5"],
-        ["TextCNN", "1e-3", "64", "10", "3", "weight decay 1e-5"],
-        ["BiLSTM + Attention", "1e-3", "64", "10", "3", "weight decay 1e-5"],
-        ["DistilBERT", "2e-5", "8 x 2 (accum.)", "3", "2", "10% linear warm-up, wd 0.01"],
-    ], widths=[3.6, 2.4, 2.6, 2.1, 1.8, 4.0])
-    caption(doc, "Table 2: Training hyperparameters.")
+    table(doc, ["Model", "LR", "Batch", "Epoch cap", "Patience", "Selected"],
+          hyperparameter_rows(runs), font=9)
+    caption(doc, "Table 2: Selected hyperparameters, read from experiment artifacts.")
+    body(doc, "Two learning rates are compared per architecture using validation F1 only: "
+         "1e-3 and 3e-4 for the non-transformers; 2e-5 and 5e-5 for DistilBERT. "
+         "The selected trial's best validation checkpoint is tested once. "
+         "This is a limited-budget search, not exhaustive optimisation. The common PyTorch "
+         "training loop replaces the initially proposed HuggingFace Trainer so all models "
+         "use the same loss, checkpoint-selection and timing implementation.")
+    tuning_rows = []
+    for name, result in runs.items():
+        if result:
+            for trial in result.get('selection', {}).get('trials', []):
+                tuning_rows.append([name, f"{trial['lr']:g}", f"{trial['validation_f1']:.4f}",
+                                    str(trial['best_epoch']), f"{trial['train_time_s']/60:.1f}"])
+    if tuning_rows:
+        table(doc, ['Model', 'Trial LR', 'Validation F1', 'Best epoch', 'Train minutes'], tuning_rows, font=9)
+        caption(doc, 'Validation-only search. Test labels were not used for selection.')
 
     # 5 Experimental setup
     doc.add_heading("5. Experimental Setup", 1)
@@ -381,7 +395,7 @@ def build():
         ("Software: ", "Python, PyTorch, HuggingFace Transformers and Datasets, scikit-learn."),
         ("Reproducibility: ", "fixed random seed 42 for the split, initialisation and data "
                               "order; all hyperparameters in src/config.py."),
-        ("Code: ", "single entry point run_all.py runs EDA, all four models and the comparison."),
+        ("Code: ", "run_all.py runs EDA, validation-only tuning, test evaluation, analysis and document generation."),
     ])
 
     # 6 Results
@@ -413,8 +427,8 @@ def build():
     body(doc,
          "The bag-of-words baseline is expected to be strong on IMDB because long reviews "
          "contain many sentiment-bearing words, so word identity alone is highly informative. "
-         "Its errors concentrate on reviews whose sentiment is reversed by negation or contrast, "
-         "which TextCNN partly captures through short n-grams and the BiLSTM through sequential "
+         "A hypothesis is that errors may involve sentiment reversed by negation or contrast, "
+         "which TextCNN is designed to capture through short n-grams and the BiLSTM through sequential "
          "context. The pre-trained transformer additionally benefits from language knowledge "
          "that a model trained on 35,000 reviews cannot acquire on its own.")
     doc.add_heading("7.3 Error analysis", 2)
@@ -424,19 +438,48 @@ def build():
          "reviews that praise some aspects and criticise others, sarcasm and irony, sentiment "
          "expressed only in the final sentences of reviews truncated at 512 tokens, and reviews "
          "that discuss the plot's negative events while recommending the film.")
+    analysis_file = RESULTS / 'analysis.json'
+    analysis = json.loads(analysis_file.read_text(encoding='utf-8')) if analysis_file.exists() else {}
+    for name, detail in analysis.get('models', {}).items():
+        low, high = detail['accuracy_95ci_wilson']
+        body(doc, f"{name}: false positives = {detail['false_positive']}; false negatives = "
+             f"{detail['false_negative']}; ROC AUC = {detail['roc_auc']:.4f}; "
+             f"95% Wilson accuracy interval = {100*low:.2f}% to {100*high:.2f}%.")
+        for group, stats in detail['length_groups'].items():
+            if stats['n']:
+                body(doc, f"{group.replace('_', ' ')}: {stats['n']} test reviews, "
+                     f"error rate {stats['error_rate']*100:.2f}%.")
+        for example in detail['most_confident_errors'][:2]:
+            body(doc, f"Actual label: {'positive' if example['label'] else 'negative'}; "
+                 f"predicted positive probability: {example['prob_positive']:.4f}. "
+                 f"Review excerpt: {example['review'][:320]}...")
+    body(doc, "These length comparisons and excerpts are descriptive. They do not establish "
+         "that truncation, sarcasm or negation caused an error. Confidence intervals cover "
+         "test-sample uncertainty, not variation across training seeds.")
+    if analysis:
+        figure(doc, RESULTS / 'confusion_matrices.png', 'Test confusion matrices: rows actual, columns predicted.', width_cm=16)
+        figure(doc, RESULTS / 'roc_curves.png', 'Test ROC curves and area under each curve.')
     doc.add_heading("7.4 Cost-benefit trade-off", 2)
-    body(doc,
-         "Figure 2 places every model on an accuracy-versus-cost plane. Models on the Pareto "
-         "front are the rational choices for some budget: the MLP when training and inference "
-         "must be nearly free, TextCNN when a small, fast model must approach transformer "
-         "accuracy, and DistilBERT when accuracy is paramount and a GPU is available.")
+    if analysis:
+        for cost, models in analysis['pareto_frontiers'].items():
+            body(doc, f"Measured accuracy/cost Pareto frontier for {cost}: {', '.join(models)}.")
+    else:
+        body(doc, "Cost-benefit conclusions are pending measured experiment results.")
+    body(doc, "Training time in the main table is for the selected trial, including validation. "
+         "Total search training time is separately recorded in comparison.csv. Downloads, "
+         "preprocessing and final test evaluation are excluded from training time. Latency "
+         "uses pretokenized inputs and includes data loading and host-to-device transfer; "
+         "it excludes text preprocessing/tokenization. It is specific to this hardware and batch size.")
     doc.add_heading("7.5 Limitations", 2)
     bullets(doc, [
         "Results come from one seed; repeating runs with several seeds would give confidence "
         "intervals.",
         "Punctuation was removed for all models to keep preprocessing identical, which may cost "
         "DistilBERT some accuracy compared with feeding it raw text.",
-        "Hyperparameters were not tuned exhaustively for each model.",
+        "Two learning-rate trials per model are a small search; longer or broader tuning may change rankings.",
+        "GloVe itself is pretrained: only the MLP is entirely trained from scratch. CNN and BiLSTM use pretrained word embeddings.",
+        "The pooled 70/15/15 split matches the synopsis but differs from the official IMDB test benchmark.",
+        "A fixed seed improves reproducibility but does not guarantee bit-identical GPU operations.",
         "Truncation at 512 tokens discards the end of the longest reviews.",
     ])
 

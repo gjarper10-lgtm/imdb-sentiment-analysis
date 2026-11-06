@@ -1,4 +1,9 @@
 .venv/
 __pycache__/
+.pytest_cache/
+*.pyc
 data/
-results/*/model.pt
+*.pt
+*.safetensors
+*.zip
+results_smoke/
