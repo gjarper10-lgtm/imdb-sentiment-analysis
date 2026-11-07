@@ -1,5 +1,8 @@
 {
   "destination": "https://github.com/gjarper10-lgtm/imdb-sentiment-analysis",
-  "status": "Pending authenticated upload",
-  "authorized_by_user": true
+  "status": "Published and remote commit verified",
+  "authorized_by_user": true,
+  "verified_utc": "2026-11-07T03:25:49.534305+00:00",
+  "initial_completed_project_commit": "db6eebf001e7b2bdb1020a8607480d858cb322a7",
+  "trained_weights": "Included in the complete ZIP asset attached to the classroom-demo-v1 release."
 }
