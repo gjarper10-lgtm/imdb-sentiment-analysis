@@ -1,0 +1,7 @@
+{
+  "model": "bilstm",
+  "max_len": 512,
+  "format_version": 1,
+  "vocab_size": 10000,
+  "freeze_emb": false
+}

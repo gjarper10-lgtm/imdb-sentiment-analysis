@@ -1,0 +1,73 @@
+{
+  "verified_utc": "2026-11-06T22:00:13.829973+00:00",
+  "full_experiment_complete": true,
+  "same_test_reviews_in_same_order": true,
+  "regression_test_command": "python -m pytest -q",
+  "regression_test_log": "docs/test_results.txt",
+  "models": {
+    "mlp": {
+      "test_metrics_recomputed": true,
+      "offline_bundle_prediction": true,
+      "selected_checkpoint_sha256": "ba424bc19b1000c21dc1451e6698966dddb8493fbac95043cf8d6da69f145cc9",
+      "example_positive_probabilities": [
+        0.9716250896453857,
+        0.011276126839220524
+      ],
+      "accuracy": 0.8962666666666667,
+      "f1": 0.8940631808278867
+    },
+    "textcnn": {
+      "test_metrics_recomputed": true,
+      "offline_bundle_prediction": true,
+      "selected_checkpoint_sha256": "62a93a2669a7ff2852d67c06110cd7cd5e876901f9214f1a3842906c70745508",
+      "example_positive_probabilities": [
+        0.9847797751426697,
+        0.0037133637815713882
+      ],
+      "accuracy": 0.8968,
+      "f1": 0.8977002379064235
+    },
+    "bilstm": {
+      "test_metrics_recomputed": true,
+      "offline_bundle_prediction": true,
+      "selected_checkpoint_sha256": "2b0b54a9e379e220ee25d903b45cf8b23587d6af59f01528b201842636c526ef",
+      "example_positive_probabilities": [
+        0.9992563128471375,
+        0.00014337958418764174
+      ],
+      "accuracy": 0.9152,
+      "f1": 0.9158284806776072
+    },
+    "distilbert": {
+      "test_metrics_recomputed": true,
+      "offline_bundle_prediction": true,
+      "selected_checkpoint_sha256": "83c72040dbff109ab499ae9f696ab788b66c034d4c8d00d1f59414fb4af1ff5e",
+      "example_positive_probabilities": [
+        0.9976003766059875,
+        0.0020121836569160223
+      ],
+      "accuracy": 0.9329333333333333,
+      "f1": 0.9329601492736239
+    }
+  },
+  "source_sha256": {
+    "src\\analysis.py": "a80f3565dda055d898e0e8825b17d4c52492f7d57cda9f3e2a7cf4686a441d50",
+    "src\\artifacts.py": "5ee9951074fc470d69b3fe0232cc27313fc2184d5747787b23bceb8ad9544180",
+    "src\\compare.py": "f862be50b16e67455d44337ad6f1c89b4e967e1e5f1bc46111c0789d3555064f",
+    "src\\config.py": "0c7218a979bfe1f35f01fd10099012a1f7beccd9ef0b693cb756db2d29f4cb7c",
+    "src\\data.py": "322e33f515f3dfe4ec9d3ffbbee77f16ad806d2be6ba2ec428fc45a07aa68995",
+    "src\\eda.py": "4c6062f1f24239708d5e1cba7b6a3a5b1d9833afd80b395a1e17bd3f739b0826",
+    "src\\engine.py": "ebb440ee21c6c747ee27a5390ce04f60be3dbb72428b24c8eb225b9a821f460c",
+    "src\\glove.py": "7bc7bcd36d4064a4b12c74cfd60b8e342e859de628edb212c583a1dff3d3d84d",
+    "src\\models.py": "4091b7c430be3a1f11b2f9267b9767dbcfc00153c869c193d93c7e45664eb6ac",
+    "src\\predict.py": "7b0009f06860f10c9986df32c6e5ba7e729a1f607bfd0e0329121da2dafbbce6",
+    "src\\run.py": "5c33fcc95fc171c792cb302c48220c84f3344bc4c7afd7e45734f8c29a5c69e5",
+    "src\\tune.py": "9170256be537eb2f054b553fd56aacf205356bfecf0371ccf1cb5ce841acdcc7",
+    "src\\__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "remote_github_publication": "See docs/publication.json for current publication state.",
+  "regression_tests_passed": 14,
+  "classroom_demo": "Positive and negative reviews verified through the browser and HTTP API; see docs/demo_verification.json.",
+  "presentation": "Six slides rendered and visually inspected; structural package check passed. Speaking notes included.",
+  "report": "DOCX rendered to PDF using LibreOffice; final pages visually inspected."
+}

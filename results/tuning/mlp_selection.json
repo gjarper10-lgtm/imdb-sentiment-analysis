@@ -1,0 +1,22 @@
+{
+  "selection_metric": "validation_f1",
+  "test_used_for_selection": false,
+  "selected": "mlp_trial2",
+  "total_search_train_time_s": 52.06967550003901,
+  "trials": [
+    {
+      "run": "mlp_trial1",
+      "lr": 0.001,
+      "validation_f1": 0.895703863820589,
+      "best_epoch": 1,
+      "train_time_s": 30.331688500009477
+    },
+    {
+      "run": "mlp_trial2",
+      "lr": 0.0003,
+      "validation_f1": 0.8985155195681511,
+      "best_epoch": 1,
+      "train_time_s": 21.737987000029534
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "model": "distilbert",
+  "display_name": "DistilBERT (fine-tuned)",
+  "validation_f1": 0.9317879030109246,
+  "best_epoch": 3,
+  "params_total": 66954241,
+  "params_trainable": 66954241,
+  "train_time_s": 1632.6483807000332,
+  "epochs_run": 3,
+  "hyperparameters": {
+    "lr": 2e-05,
+    "batch_size": 8,
+    "grad_accum": 2,
+    "epochs": 3,
+    "patience": 2,
+    "weight_decay": 0.01,
+    "warmup_frac": 0.1
+  },
+  "subset": null,
+  "max_len": 512,
+  "glove": false,
+  "seed": 42,
+  "device": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "split_sizes": {
+    "train": 35000,
+    "val": 7500,
+    "test": 7500
+  },
+  "split_fingerprint": "c2ce89525b7d5c63a1f30d020e64731e14b6d9b773cf0b0d9a71c7cdddf8609e",
+  "freeze_emb": false,
+  "amp": true,
+  "created_utc": "2026-11-06T18:12:14.193048+00:00",
+  "versions": {
+    "torch": "2.6.0+cu124",
+    "transformers": "4.57.6",
+    "datasets": "3.6.0",
+    "scikit-learn": "1.9.1",
+    "numpy": "2.3.5"
+  }
+}

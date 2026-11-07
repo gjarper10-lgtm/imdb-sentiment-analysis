@@ -1,0 +1,81 @@
+{
+  "model": "textcnn",
+  "display_name": "TextCNN (GloVe-300)",
+  "validation_f1": 0.9019607843137255,
+  "best_epoch": 3,
+  "params_total": 3270601,
+  "params_trainable": 3270601,
+  "train_time_s": 44.00682929996401,
+  "epochs_run": 3,
+  "hyperparameters": {
+    "lr": 0.001,
+    "batch_size": 64,
+    "epochs": 3,
+    "patience": 3,
+    "weight_decay": 1e-05
+  },
+  "subset": null,
+  "max_len": 512,
+  "glove": true,
+  "seed": 42,
+  "device": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "split_sizes": {
+    "train": 35000,
+    "val": 7500,
+    "test": 7500
+  },
+  "split_fingerprint": "c2ce89525b7d5c63a1f30d020e64731e14b6d9b773cf0b0d9a71c7cdddf8609e",
+  "freeze_emb": false,
+  "amp": true,
+  "created_utc": "2026-11-06T17:12:40.608939+00:00",
+  "versions": {
+    "torch": "2.6.0+cu124",
+    "transformers": "4.57.6",
+    "datasets": "3.6.0",
+    "scikit-learn": "1.9.1",
+    "numpy": "2.3.5"
+  },
+  "selection": {
+    "selection_metric": "validation_f1",
+    "test_used_for_selection": false,
+    "selected": "textcnn_trial1",
+    "total_search_train_time_s": 89.4814408000093,
+    "trials": [
+      {
+        "run": "textcnn_trial1",
+        "lr": 0.001,
+        "validation_f1": 0.9019607843137255,
+        "best_epoch": 3,
+        "train_time_s": 44.00682929996401
+      },
+      {
+        "run": "textcnn_trial2",
+        "lr": 0.0003,
+        "validation_f1": 0.8841504821404319,
+        "best_epoch": 3,
+        "train_time_s": 45.474611500045285
+      }
+    ]
+  },
+  "test": {
+    "accuracy": 0.8968,
+    "precision": 0.889937106918239,
+    "recall": 0.9056,
+    "f1": 0.8977002379064235,
+    "confusion_matrix": [
+      [
+        3330,
+        420
+      ],
+      [
+        354,
+        3396
+      ]
+    ],
+    "loss": 0.2478972717285156
+  },
+  "latency_ms_per_review_batched": 0.14023109332968792,
+  "latency_ms_single_review": 14.648145500104874,
+  "latency_single_samples": 200,
+  "latency_scope": "pretokenized input, includes loader and device transfer; excludes tokenization"
+}

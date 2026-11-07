@@ -1,0 +1,60 @@
+{
+  "mlp": [
+    {
+      "review_id": "1cf84e0138020dbe9f82ceb007cfb3be029d5ee99a12f8bee484a2f627ddff4f",
+      "category": "Possible label inconsistency",
+      "interpretation": "The text repeatedly praises the film and gives a high rating, while the dataset label is negative. This is an annotation ambiguity to inspect; the ground-truth label has not been changed."
+    },
+    {
+      "review_id": "8b1530ac498e8de01171057c4374205f6aebf7e3052c497a35f3a849e06e2036",
+      "category": "Mixed assessment",
+      "interpretation": "Most of the review is critical, but it ends with a B grade. Bag-of-words evidence can outweigh the favourable overall grade. This reading describes the example, not a proven causal explanation."
+    },
+    {
+      "review_id": "77c58c7dc7a5e7c9f7bb289246f7f62b5bdb73469174c65be7d0fbf368956337",
+      "category": "Possible ironic praise",
+      "interpretation": "Exaggerated praise and implausible comparisons may be ironic. The negative label conflicts with the literal positive wording; context beyond isolated sentiment words may be needed."
+    }
+  ],
+  "textcnn": [
+    {
+      "review_id": "cc3c05e1888ee5db55afc92edd12b34726ab7ea7d71231133cdf9c8732e8bcf4",
+      "category": "Qualified recommendation",
+      "interpretation": "The reviewer lists flaws but gives the film credit for ambition and concludes with qualified approval. Strong negative local phrases coexist with the positive label."
+    },
+    {
+      "review_id": "77c58c7dc7a5e7c9f7bb289246f7f62b5bdb73469174c65be7d0fbf368956337",
+      "category": "Possible ironic praise",
+      "interpretation": "The review uses sustained exaggerated praise despite a negative label. Literal positive n-grams can conflict with an ironic interpretation."
+    },
+    {
+      "review_id": "acf3896433ca742cd6b9382c067a531915f77e7632c02b45d8f1b886282630ad",
+      "category": "Enjoyment of a bad film",
+      "interpretation": "The reviewer enjoys repeated screenings of a film described as inept and campy. Positive entertainment value is expressed through negative craft-related vocabulary."
+    }
+  ],
+  "bilstm": [
+    {
+      "review_id": "1cf84e0138020dbe9f82ceb007cfb3be029d5ee99a12f8bee484a2f627ddff4f",
+      "category": "Possible label inconsistency",
+      "interpretation": "The text praises the film and assigns a high score despite its negative dataset label. This may be an annotation inconsistency; the original label is retained."
+    },
+    {
+      "review_id": "acf3896433ca742cd6b9382c067a531915f77e7632c02b45d8f1b886282630ad",
+      "category": "Enjoyment of camp",
+      "interpretation": "The writer enjoys repeat screenings while calling the filmmaking inept. The positive recommendation is compatible with negative descriptions of production quality."
+    }
+  ],
+  "distilbert": [
+    {
+      "review_id": "b482552bbfa0d9926b183ba80d0d0988d75eeec88a66dccf150b16f49f8a7fc5",
+      "category": "Possible label inconsistency",
+      "interpretation": "The review explicitly says the film disappoints and recommends the original instead, despite a positive dataset label. The near-zero predicted positive probability agrees with the literal prose; label quality warrants inspection."
+    },
+    {
+      "review_id": "a3a040724495ae7c31f73fd06e4a695c060a432335a809bf4262f3a67189e905",
+      "category": "Qualified praise amid criticism",
+      "interpretation": "Most of the review criticises the plot, but it praises the lead performance and calls it worth watching for her. The positive label coexists with substantial negative wording."
+    }
+  ]
+}

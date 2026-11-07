@@ -1,0 +1,22 @@
+{
+  "selection_metric": "validation_f1",
+  "test_used_for_selection": false,
+  "selected": "distilbert_trial1",
+  "total_search_train_time_s": 3248.4896368001355,
+  "trials": [
+    {
+      "run": "distilbert_trial1",
+      "lr": 2e-05,
+      "validation_f1": 0.9317879030109246,
+      "best_epoch": 3,
+      "train_time_s": 1632.6483807000332
+    },
+    {
+      "run": "distilbert_trial2",
+      "lr": 5e-05,
+      "validation_f1": 0.9317515329245535,
+      "best_epoch": 3,
+      "train_time_s": 1615.8412561001023
+    }
+  ]
+}

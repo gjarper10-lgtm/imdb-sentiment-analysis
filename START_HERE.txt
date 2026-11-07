@@ -1,0 +1,31 @@
+IMDB PROJECT: CLASSROOM DEMO
+
+On this computer, open this project folder:
+C:\Users\akarn\Documents\Codex\2026-11-06\th\outputs\IMDB-Sentiment-DL-Project
+
+1. Double-click RUN_DEMO.cmd. Keep the command window open.
+   If the demo is already running, go directly to step 2.
+2. Open Chrome or Edge and enter: http://127.0.0.1:8765
+3. Show the measured-results table.
+4. Click Positive example, then Analyze with all four models.
+5. Click Negative example, then Analyze with all four models.
+6. Open docs\Presentation_10_Minutes.pptx in PowerPoint. Press F5.
+7. Read docs\DEMO_AND_VIVA.html for the speaking script and viva answers.
+
+Suggested order in class: slides (4 minutes), demo (2 minutes), viva (3 minutes).
+Start the server and run one example BEFORE the presentation.
+No training or internet connection is needed for this prepared local demo.
+Closing the server stops the demo. Restart RUN_DEMO.cmd when needed.
+If port 8765 is already in use, first try opening the URL: it may already be running.
+
+Results: MLP 89.63%, TextCNN 89.68%, BiLSTM 91.52%, DistilBERT 93.29% accuracy.
+These are from a custom 7,500-review test split. Duplicates across splits are a limitation.
+
+MOVING TO ANOTHER COMPUTER
+Use the complete ZIP from the GitHub release, which includes trained model weights.
+The normal GitHub source ZIP does not include the large model.pt files.
+Extract the complete ZIP, install Python 3.11, open a terminal in the project folder:
+  python -m venv .venv
+  .venv\Scripts\python -m pip install -r requirements.txt
+Then double-click RUN_DEMO.cmd. Initial dependency installation requires internet.
+For retraining instructions, see README.md; do not retrain during your presentation.

@@ -1,0 +1,25 @@
+{
+  "n_reviews": 50000,
+  "split_sizes": {
+    "train": 35000,
+    "val": 7500,
+    "test": 7500
+  },
+  "positive_fraction": 0.5,
+  "length_words": {
+    "mean": 230.99334,
+    "median": 173.0,
+    "p90": 451.0,
+    "p95": 588.0499999999956,
+    "max": 2473
+  },
+  "fraction_truncated_at_max_len": 0.0737,
+  "train_vocabulary_size": 93095,
+  "train_token_coverage_of_10k_vocab": 0.9435637977200985,
+  "duplicate_cleaned_reviews": 424,
+  "cross_split_exact_text_overlap": {
+    "train_val": 84,
+    "train_test": 91,
+    "val_test": 24
+  }
+}

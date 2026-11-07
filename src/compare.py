@@ -3,10 +3,14 @@
     python -m src.compare
 """
 import json
+import os
+from . import config as C
+os.environ.setdefault('MPLCONFIGDIR', str(C.DATA_DIR / 'matplotlib-cache'))
 
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.ticker import LogLocator, NullFormatter, MaxNLocator
 import pandas as pd
 
 from . import config as C
@@ -48,6 +52,8 @@ def plot_curves(out):
     axes[0].set(xlabel="epoch", ylabel="validation loss")
     axes[1].set(xlabel="epoch", ylabel="validation F1")
     axes[1].legend()
+    for ax in axes:
+        ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     fig.tight_layout()
     fig.savefig(out / "learning_curves.png", dpi=150)
     plt.close(fig)
@@ -78,8 +84,11 @@ def main():
         ax.scatter(df[x], df["accuracy"] * 100, s=70)
         for _, r in df.iterrows():
             ax.annotate(r["model"].split(" (")[0], (r[x], r["accuracy"] * 100),
-                        textcoords="offset points", xytext=(6, 4), fontsize=9)
+                        textcoords="offset points", xytext=(5, -14 if r['run'] == 'textcnn' else 5), fontsize=9)
         ax.set(xscale="log", xlabel=label, ylabel="test accuracy (%)")
+        ax.set_xlim(df[x].min() * .75, df[x].max() * 2.8)
+        ax.xaxis.set_major_locator(LogLocator(base=10, numticks=4))
+        ax.xaxis.set_minor_formatter(NullFormatter())
         ax.grid(alpha=0.3)
     fig.suptitle("Accuracy vs. cost on IMDB (common protocol)")
     fig.tight_layout()

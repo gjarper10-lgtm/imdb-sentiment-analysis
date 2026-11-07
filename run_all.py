@@ -40,6 +40,7 @@ def main():
     if output == root / 'results':
         execute(['docs/build_report.py'])
         execute(['docs/build_slides.py'])
+        execute(['docs/build_short_slides.py'])
         execute(['docs/export_pdf.py'])
     print(f'Experiment artifacts: {output}')
 

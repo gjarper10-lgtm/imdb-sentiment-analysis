@@ -1,0 +1,22 @@
+{
+  "selection_metric": "validation_f1",
+  "test_used_for_selection": false,
+  "selected": "bilstm_trial1",
+  "total_search_train_time_s": 1660.2316139000468,
+  "trials": [
+    {
+      "run": "bilstm_trial1",
+      "lr": 0.001,
+      "validation_f1": 0.9149861605377619,
+      "best_epoch": 3,
+      "train_time_s": 839.8901153999614
+    },
+    {
+      "run": "bilstm_trial2",
+      "lr": 0.0003,
+      "validation_f1": 0.9086794462193823,
+      "best_epoch": 3,
+      "train_time_s": 820.3414985000854
+    }
+  ]
+}

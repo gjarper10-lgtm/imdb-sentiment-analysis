@@ -35,22 +35,33 @@ def build():
                               spaceAfter=7, alignment=TA_JUSTIFY))
     styles.add(ParagraphStyle('TitleProject', fontName=bold, fontSize=17, leading=22,
                               alignment=TA_CENTER, spaceAfter=18))
+    styles.add(ParagraphStyle('CenterProject', fontName=regular, fontSize=10, leading=14,
+                              alignment=TA_CENTER, spaceAfter=9))
     styles.add(ParagraphStyle('HeadingProject', fontName=bold, fontSize=14, leading=18,
                               spaceBefore=13, spaceAfter=8, keepWithNext=True, textColor=colors.HexColor('#1f3a5f')))
     styles.add(ParagraphStyle('SubheadingProject', parent=styles['HeadingProject'], fontSize=12, leading=16))
     styles.add(ParagraphStyle('CellProject', fontName=regular, fontSize=8, leading=10))
     width = A4[0] - 104
     story = []
+    skip_toc = False
     for element in source.element.body:
         if element.tag == qn('w:p'):
             p = WordParagraph(element, source._body)
             text = p.text.strip()
+            if text == 'Table of Contents':
+                skip_toc = True
+                continue
+            if skip_toc:
+                if any(br.get(qn('w:type')) == 'page' for br in element.iter(qn('w:br'))):
+                    skip_toc = False
+                continue
             if text and 'Right-click and choose Update Field' not in text and text != 'Table of Contents':
                 name = p.style.name if p.style else ''
                 style = styles['HeadingProject' if name == 'Heading 1' else
                                'SubheadingProject' if name.startswith('Heading') else 'BodyProject']
                 if p.alignment == 1:
-                    style = styles['TitleProject']
+                    largest = max((r.font.size.pt for r in p.runs if r.font.size), default=11)
+                    style = styles['TitleProject' if largest >= 17 else 'CenterProject']
                 prefix = '- ' if name.startswith('List') else ''
                 story.append(Paragraph(escape(prefix + text), style))
             for blip in element.iter(qn('a:blip')):

@@ -46,7 +46,7 @@ def main(argv=None):
                 call.extend(['--' + flag.replace('_', '-'), str(value)])
         if args.no_glove:
             call.append('--no-glove')
-        if (directory / 'bundle.json').exists() and (directory / 'run.json').exists():
+        if all((directory / name).exists() for name in ['bundle.json', 'run.json', 'model.pt']):
             result = json.loads((directory / 'run.json').read_text(encoding='utf-8'))
             expected_glove = args.model in ('textcnn', 'bilstm') and not args.no_glove
             if (result['hyperparameters']['lr'] != rate or result['hyperparameters']['epochs'] != args.epochs
@@ -56,6 +56,8 @@ def main(argv=None):
                 raise ValueError(f'Existing trial configuration differs: {directory}; use another output-root')
             print(f'Resuming completed trial: {directory}')
         else:
+            if (directory / 'run.json').exists():
+                call.append('--overwrite')  # recover an interrupted bundle write
             result = run.main(call)
         candidates.append((directory, result))
         gc.collect()

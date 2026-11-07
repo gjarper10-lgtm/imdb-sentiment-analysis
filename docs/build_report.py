@@ -4,6 +4,7 @@
 """
 import sys
 import json
+import hashlib
 from pathlib import Path
 
 from docx import Document
@@ -111,6 +112,11 @@ def table(doc, header, data, widths=None, font=10):
         for c in row.cells:
             c.paragraphs[0].paragraph_format.space_after = Pt(0)
             c.paragraphs[0].paragraph_format.line_spacing = 1.0
+    # Keep each compact table together and its last row with the caption.
+    for row in t.rows:
+        for c in row.cells:
+            for p in c.paragraphs:
+                p.paragraph_format.keep_with_next = True
     if widths:
         for row in t.rows:
             for i, w in enumerate(widths):
@@ -150,16 +156,10 @@ def page_numbers(section):
 
 
 def toc(doc):
-    p = doc.add_paragraph()
-    run = p.add_run()
-    begin = OxmlElement("w:fldChar"); begin.set(qn("w:fldCharType"), "begin")
-    instr = OxmlElement("w:instrText"); instr.set(qn("xml:space"), "preserve")
-    instr.text = 'TOC \\o "1-2" \\h \\z \\u'
-    sep = OxmlElement("w:fldChar"); sep.set(qn("w:fldCharType"), "separate")
-    txt = OxmlElement("w:t"); txt.text = "Right-click and choose Update Field to build the table of contents."
-    end = OxmlElement("w:fldChar"); end.set(qn("w:fldCharType"), "end")
-    for el in (begin, instr, sep, txt, end):
-        run._r.append(el)
+    for title in ("1. Introduction", "2. Literature Review", "3. Dataset and Exploratory Analysis",
+                  "4. Methodology", "5. Experimental Setup", "6. Results", "7. Discussion",
+                  "8. Conclusion and Future Work", "References", "Appendix A: Reproducing the Results"):
+        doc.add_paragraph(title)
 
 
 def page_break(doc):
@@ -241,7 +241,7 @@ def build():
         "To evaluate MLP bag-of-words, TextCNN, BiLSTM-Attention and DistilBERT architectures on "
         "binary sentiment classification accuracy, F1-score and inference latency on the IMDB "
         "dataset under a common evaluation protocol.",
-        "To measure the performance gap between models trained from scratch (MLP, CNN, BiLSTM) "
+        "To measure the performance gap between non-transformer models (MLP, CNN, BiLSTM) "
         "and a fine-tuned pre-trained transformer (DistilBERT), and to characterise the "
         "cost-benefit trade-off in training time and parameter count.",
     ], style="List Number")
@@ -313,6 +313,12 @@ def build():
             ["Other statistics", f"{TBD}: run python -m src.eda"],
         ], widths=[9, 6])
     caption(doc, "Table 1: Dataset statistics after cleaning.")
+    if eda and 'cross_split_exact_text_overlap' in eda:
+        overlaps = eda['cross_split_exact_text_overlap']
+        body(doc, f"Exact cleaned-text audit: {eda['duplicate_cleaned_reviews']} duplicate entries; "
+             + ', '.join(f'{name}: {count}' for name, count in overlaps.items())
+             + '. The synopsis split is retained. Any cross-split duplicate text can inflate measured performance; '
+               'a deduplicated/grouped split is an appropriate follow-up experiment.')
     figure(doc, RESULTS / "eda" / "length_distribution.png",
            "Figure 1: Distribution of review lengths by class; the dashed line marks the "
            "512-token cut-off.")
@@ -440,6 +446,8 @@ def build():
          "that discuss the plot's negative events while recommending the film.")
     analysis_file = RESULTS / 'analysis.json'
     analysis = json.loads(analysis_file.read_text(encoding='utf-8')) if analysis_file.exists() else {}
+    notes_file = OUT.parent / 'qualitative_notes.json'
+    notes = json.loads(notes_file.read_text(encoding='utf-8')) if notes_file.exists() else {}
     for name, detail in analysis.get('models', {}).items():
         low, high = detail['accuracy_95ci_wilson']
         body(doc, f"{name}: false positives = {detail['false_positive']}; false negatives = "
@@ -453,6 +461,10 @@ def build():
             body(doc, f"Actual label: {'positive' if example['label'] else 'negative'}; "
                  f"predicted positive probability: {example['prob_positive']:.4f}. "
                  f"Review excerpt: {example['review'][:320]}...")
+            review_id = hashlib.sha256(example['review'].encode()).hexdigest()
+            note = next((n for n in notes.get(name, []) if n['review_id'] == review_id), None)
+            if note:
+                body(doc, f"Interpretive reading — {note['category']}: {note['interpretation']}")
     body(doc, "These length comparisons and excerpts are descriptive. They do not establish "
          "that truncation, sarcasm or negation caused an error. Confidence intervals cover "
          "test-sample uncertainty, not variation across training seeds.")

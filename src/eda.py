@@ -3,6 +3,9 @@
     python -m src.eda
 """
 import json
+import os
+from . import config as C
+os.environ.setdefault('MPLCONFIGDIR', str(C.DATA_DIR / 'matplotlib-cache'))
 import argparse
 from pathlib import Path
 from collections import Counter
@@ -39,6 +42,11 @@ def main():
         "fraction_truncated_at_max_len": float((lengths > C.MAX_LEN).mean()),
         "train_vocabulary_size": len(train_counts),
         "train_token_coverage_of_10k_vocab": top10k / sum(train_counts.values()),
+        'duplicate_cleaned_reviews': len(texts) - len(set(texts)),
+        'cross_split_exact_text_overlap': {
+            f'{a}_{b}': len(set(splits[a][0]) & set(splits[b][0]))
+            for a, b in [('train', 'val'), ('train', 'test'), ('val', 'test')]
+        },
     }
     (out / "eda_stats.json").write_text(json.dumps(stats, indent=2))
     print(json.dumps(stats, indent=2))

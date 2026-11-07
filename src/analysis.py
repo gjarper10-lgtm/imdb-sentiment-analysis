@@ -1,5 +1,8 @@
 """Measured error analysis, confusion matrices, ROC curves and cost tradeoffs."""
 import json
+import os
+from . import config as C
+os.environ.setdefault('MPLCONFIGDIR', str(C.DATA_DIR / 'matplotlib-cache'))
 import math
 
 import matplotlib

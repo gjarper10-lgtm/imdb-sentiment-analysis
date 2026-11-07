@@ -1,0 +1,81 @@
+{
+  "model": "mlp",
+  "display_name": "MLP (TF-IDF BoW)",
+  "validation_f1": 0.8985155195681511,
+  "best_epoch": 1,
+  "params_total": 5186305,
+  "params_trainable": 5186305,
+  "train_time_s": 21.737987000029534,
+  "epochs_run": 3,
+  "hyperparameters": {
+    "lr": 0.0003,
+    "batch_size": 64,
+    "epochs": 3,
+    "patience": 3,
+    "weight_decay": 1e-05
+  },
+  "subset": null,
+  "max_len": 512,
+  "glove": false,
+  "seed": 42,
+  "device": "NVIDIA GeForce RTX 4060 Laptop GPU",
+  "split_sizes": {
+    "train": 35000,
+    "val": 7500,
+    "test": 7500
+  },
+  "split_fingerprint": "c2ce89525b7d5c63a1f30d020e64731e14b6d9b773cf0b0d9a71c7cdddf8609e",
+  "freeze_emb": false,
+  "amp": true,
+  "created_utc": "2026-11-06T17:11:33.409724+00:00",
+  "versions": {
+    "torch": "2.6.0+cu124",
+    "transformers": "4.57.6",
+    "datasets": "3.6.0",
+    "scikit-learn": "1.9.1",
+    "numpy": "2.3.5"
+  },
+  "selection": {
+    "selection_metric": "validation_f1",
+    "test_used_for_selection": false,
+    "selected": "mlp_trial2",
+    "total_search_train_time_s": 52.06967550003901,
+    "trials": [
+      {
+        "run": "mlp_trial1",
+        "lr": 0.001,
+        "validation_f1": 0.895703863820589,
+        "best_epoch": 1,
+        "train_time_s": 30.331688500009477
+      },
+      {
+        "run": "mlp_trial2",
+        "lr": 0.0003,
+        "validation_f1": 0.8985155195681511,
+        "best_epoch": 1,
+        "train_time_s": 21.737987000029534
+      }
+    ]
+  },
+  "test": {
+    "accuracy": 0.8962666666666667,
+    "precision": 0.9134668892598776,
+    "recall": 0.8754666666666666,
+    "f1": 0.8940631808278867,
+    "confusion_matrix": [
+      [
+        3439,
+        311
+      ],
+      [
+        467,
+        3283
+      ]
+    ],
+    "loss": 0.25051265602111816
+  },
+  "latency_ms_per_review_batched": 0.0267075733281672,
+  "latency_ms_single_review": 0.4279054998187348,
+  "latency_single_samples": 200,
+  "latency_scope": "pretokenized input, includes loader and device transfer; excludes tokenization"
+}

@@ -1,0 +1,167 @@
+{
+  "models": {
+    "mlp": {
+      "accuracy_95ci_wilson": [
+        0.8891617219369322,
+        0.902965873080532
+      ],
+      "roc_auc": 0.962938168888889,
+      "false_positive": 311,
+      "false_negative": 467,
+      "length_groups": {
+        "at_most_512_words": {
+          "n": 6966,
+          "error_rate": 0.1017800746482917
+        },
+        "over_512_words": {
+          "n": 534,
+          "error_rate": 0.12921348314606743
+        }
+      },
+      "most_confident_errors": [
+        {
+          "label": 0,
+          "prob_positive": 0.9949,
+          "review": "this movie was pure genius john waters is brilliant it is hilarious and i am not sick of it even after seeing it about 20 times since i bought it a few months ago the acting is great although ricki lake could have been better and johnny depp is magnificent he is such a beautiful man and a very talented actor and seeing most of johnnys movies this is probably my favorite i give it 9 5 10 rent it today"
+        },
+        {
+          "label": 1,
+          "prob_positive": 0.0111,
+          "review": "hardly a masterpiece not so well written beautiful cinematography i think not this movie wasnt too terrible but it wasnt that much better than average the main story dealing with highly immoral teens should have focused more on the forbidden romance and why this was should have really gotten into it instead of scraping the surface with basically because mom says we cant some parts should have been dropped altogether or reworked to have more importance to the plight of the two main characters couple times i was wondering if the writer director was a fan of george lucas classic american graffiti not that its wrong to be a fan of that movie but to make your movie at times look like that i mean come on worst part of this was that madchen amick had such a small part i mean double come on she was the only one in one or two lines who actually tried a southern accent take a good listen it was there even though her character was from california doh maybe if she was the star others could have followed and we would have had a more authentically sounding movie oh well what can ya do when you have a director whos just a director and not an artist also too bad overall i give this a b and thats being a little generous cause im partial to ms amick"
+        },
+        {
+          "label": 0,
+          "prob_positive": 0.9889,
+          "review": "this has to be one of the all time greatest horror movies charles band made the best movie of 96 in this little seen gem highly realistic and incredibly stylised with a visual flair david fincher would envy its not hard to see why band went on to make such classics as killjoy 2 deliverance from evil the regina pierce affair virgins of sherwood forest and timegate tales of the saddle tramps with a highly sophisticated story a tiny body with a large head controls a family of weirdos who perform experiments on naked women this movie may be a bit too much for younger viewers and is only for the most educated type of viewer but for those who see it band is able to convey subtle messages about the human condition through his masterpiece the head is symbolic of the lost love and longing for ones inner self that we all must face at one point or another and for this reason i was able to engage with this film on a deeply personal level although many earlier critics have compared bands film to re animator and other lesser works this stands head and heels above the rest it is gorier but not pointlessly the gore in this film is well crafted and used to enhance the storyline rather than to just get a cheap shriek out of the audience also the special effects in this film are absolutely top notch easily the best work done in a horror film since well ever the work in this film makes savinis effects look like the work of a blind limbless hobo the only problem i have with this film is the copious amounts of full frontal nudity which were ultimately unnecessary in achieving the composers goal to create a timeless epic that would forever go down in history as possibly the greatest film of all time if it were not for this slight problem i would have given this film a perfect 10"
+        }
+      ]
+    },
+    "textcnn": {
+      "accuracy_95ci_wilson": [
+        0.8897104785883986,
+        0.9034832370145535
+      ],
+      "roc_auc": 0.9643885511111111,
+      "false_positive": 420,
+      "false_negative": 354,
+      "length_groups": {
+        "at_most_512_words": {
+          "n": 6966,
+          "error_rate": 0.1022107378696526
+        },
+        "over_512_words": {
+          "n": 534,
+          "error_rate": 0.11610486891385768
+        }
+      },
+      "most_confident_errors": [
+        {
+          "label": 1,
+          "prob_positive": 0.0002,
+          "review": "ive read some terrible things about this film so i was prepared for the worst confusing muddled horribly structured while there may be merit to some of these accusations this film was nowhere near as horrific as your average dvd programmer in fact it actually had aspirations it attempted something beyond the typical monster slasher nonsense and by god there are some interesting things going on ms barbeau is a miracle to behold she carries the film squarely on her shoulders this is not to say that its a masterpiece unholy ultimately collapses under the weight of its own ambition there are just too many unexplained subplots trying to coexist and the plot loopholes created by time travel are never really addressed for example if hope knows that her mother is evil and that she will ultimately kill her brother then why doesnt she just kill ma in the films very first sequence seems like it would have beat the hell out of traveling into the future to do it still i give unholy points for trying a little ambition is not a bad thing"
+        },
+        {
+          "label": 0,
+          "prob_positive": 0.9997,
+          "review": "this has to be one of the all time greatest horror movies charles band made the best movie of 96 in this little seen gem highly realistic and incredibly stylised with a visual flair david fincher would envy its not hard to see why band went on to make such classics as killjoy 2 deliverance from evil the regina pierce affair virgins of sherwood forest and timegate tales of the saddle tramps with a highly sophisticated story a tiny body with a large head controls a family of weirdos who perform experiments on naked women this movie may be a bit too much for younger viewers and is only for the most educated type of viewer but for those who see it band is able to convey subtle messages about the human condition through his masterpiece the head is symbolic of the lost love and longing for ones inner self that we all must face at one point or another and for this reason i was able to engage with this film on a deeply personal level although many earlier critics have compared bands film to re animator and other lesser works this stands head and heels above the rest it is gorier but not pointlessly the gore in this film is well crafted and used to enhance the storyline rather than to just get a cheap shriek out of the audience also the special effects in this film are absolutely top notch easily the best work done in a horror film since well ever the work in this film makes savinis effects look like the work of a blind limbless hobo the only problem i have with this film is the copious amounts of full frontal nudity which were ultimately unnecessary in achieving the composers goal to create a timeless epic that would forever go down in history as possibly the greatest film of all time if it were not for this slight problem i would have given this film a perfect 10"
+        },
+        {
+          "label": 1,
+          "prob_positive": 0.0003,
+          "review": "i have screened this movie several times here at college and every time i show it the number of people watching with me grows exponentially in addition to the virgins anyone ive already shown it to needs to see it again it takes a little while to get into it but by the end the whole room is screaming shouting yelling rewinding scenes repeatedly repeating dialogue and just totally and completely engrossed in the moviegoing experience that is pia zadora in the lonely lady scene after scene after scene of the most ineptly filmed poorly written horribly acted trash is thrown at you in an all out assault that ranks as the campiest thing i own no small statement friends for me nothing compares 2 u pia and i dont suppose im the only one whos ever felt this way"
+        }
+      ]
+    },
+    "bilstm": {
+      "accuracy_95ci_wilson": [
+        0.9086805230065583,
+        0.9212943527957241
+      ],
+      "roc_auc": 0.9701665422222222,
+      "false_positive": 346,
+      "false_negative": 290,
+      "length_groups": {
+        "at_most_512_words": {
+          "n": 6966,
+          "error_rate": 0.082687338501292
+        },
+        "over_512_words": {
+          "n": 534,
+          "error_rate": 0.11235955056179775
+        }
+      },
+      "most_confident_errors": [
+        {
+          "label": 0,
+          "prob_positive": 0.9997,
+          "review": "this movie was pure genius john waters is brilliant it is hilarious and i am not sick of it even after seeing it about 20 times since i bought it a few months ago the acting is great although ricki lake could have been better and johnny depp is magnificent he is such a beautiful man and a very talented actor and seeing most of johnnys movies this is probably my favorite i give it 9 5 10 rent it today"
+        },
+        {
+          "label": 1,
+          "prob_positive": 0.0018,
+          "review": "i have screened this movie several times here at college and every time i show it the number of people watching with me grows exponentially in addition to the virgins anyone ive already shown it to needs to see it again it takes a little while to get into it but by the end the whole room is screaming shouting yelling rewinding scenes repeatedly repeating dialogue and just totally and completely engrossed in the moviegoing experience that is pia zadora in the lonely lady scene after scene after scene of the most ineptly filmed poorly written horribly acted trash is thrown at you in an all out assault that ranks as the campiest thing i own no small statement friends for me nothing compares 2 u pia and i dont suppose im the only one whos ever felt this way"
+        },
+        {
+          "label": 0,
+          "prob_positive": 0.9977,
+          "review": "i desperately want to give this movie a 10 i really do some movies especially horror movies are so budget that they are good a wise cracking ninja scarecrow who can implement corn cobs as lethal weaponry definitely fits this budget to brilliance system the depth of the movie is definitely its strong point and the twists and turns it implements keeping the audience at the edge of their seats really drives the creepy ninja puberty stricken pre thirty year old student non cowboy drawing wise cracking son of a bitch scarecrow into the limelight as the creepiest horror icon of the year all i can really say is can you dig it and recommend watching movies such as frankenfish if you enjoy this sort of hilarious horror what the hell were they smoking"
+        }
+      ]
+    },
+    "distilbert": {
+      "accuracy_95ci_wilson": [
+        0.9270476609875613,
+        0.9383757242821917
+      ],
+      "roc_auc": 0.9812946488888887,
+      "false_positive": 253,
+      "false_negative": 250,
+      "length_groups": {
+        "at_most_512_words": {
+          "n": 6966,
+          "error_rate": 0.06488659201837496
+        },
+        "over_512_words": {
+          "n": 534,
+          "error_rate": 0.09550561797752809
+        }
+      },
+      "most_confident_errors": [
+        {
+          "label": 1,
+          "prob_positive": 0.0014,
+          "review": "after 16 years tim burton finally disappoints me whatever happened to the old burton who read the dark knight returns by frank miller as research for his preparation to direct batman back in 1988 89 by the looks of it burton didnt research the book nor the movie cause he got everything wrong this movie sucks its not as good as the original and it doesnt deal with the same subject as the original if you want a good ape movie watch the original out of stars"
+        },
+        {
+          "label": 1,
+          "prob_positive": 0.0015,
+          "review": "infamous pre code film really the one film that caused people to insist on the hayes code being strictly enforced barbara stanwyck stars as a young girl whose liquor selling father has no problem pimping her out to customers when he dies in an accident shes released out into the world with the knowledge that her nubile body can get her whatever she wants she goes to new york and proceeds to climb the corporate ladder one bed at a time although obviously theres no actual sex shown the film is quite sleazy unfortunately after the initial shock value fades around the time stanwyck screws a rail car inspector so she can travel for free the film becomes a tad repetitive and dull stanwyck herself is the only thing that keeps the film worth sitting through as always shes fantastic"
+        },
+        {
+          "label": 1,
+          "prob_positive": 0.0016,
+          "review": "i can tell you just how bad this movie is i was in the movie and i havent seen it yet but i cringe at the thought of anyone actually paying to see me drunk especially considering what we did that year the thing is that they probably over edited it especially the scene where my roommate was snorting coke of the tits of a mexican prostitute they probably should have followed him around we made a few come and go appearances but aside from that i cant really remember anything i was the mc in a few scenes from what im told what i can tell you is that everyone avoided the camera crew since who wants to be remembered as the guy who threw up or the girl who showed her tits to the world or the girl that loser lost his virginity to overall the trip itself was crazy but people act different once the camera is on them"
+        }
+      ]
+    }
+  },
+  "pareto_frontiers": {
+    "params_M": [
+      "textcnn",
+      "bilstm",
+      "distilbert"
+    ],
+    "ms_per_review_single": [
+      "mlp",
+      "distilbert"
+    ],
+    "train_time_min": [
+      "mlp",
+      "textcnn",
+      "bilstm",
+      "distilbert"
+    ]
+  },
+  "confidence_interval_note": "Test-sample uncertainty only; does not capture variation across training seeds.",
+  "length_note": "Word lengths are before truncation. DistilBERT uses subword tokens; the word-length comparison is descriptive, not a causal test."
+}

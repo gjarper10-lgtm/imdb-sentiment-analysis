@@ -1,0 +1,56 @@
+{
+  "/": 200,
+  "/api/results": 200,
+  "/docs/Presentation_10_Minutes.pptx": 200,
+  "/docs/DEMO_AND_VIVA.html": 200,
+  "/docs/Project_Report.pdf": 200,
+  "positive": {
+    "predictions": [
+      {
+        "model": "MLP (TF-IDF)",
+        "sentiment": "Positive",
+        "probability_positive": 0.9899128079414368
+      },
+      {
+        "model": "TextCNN",
+        "sentiment": "Positive",
+        "probability_positive": 0.9929619431495667
+      },
+      {
+        "model": "BiLSTM + Attention",
+        "sentiment": "Positive",
+        "probability_positive": 0.9995319843292236
+      },
+      {
+        "model": "DistilBERT",
+        "sentiment": "Positive",
+        "probability_positive": 0.997215986251831
+      }
+    ]
+  },
+  "negative": {
+    "predictions": [
+      {
+        "model": "MLP (TF-IDF)",
+        "sentiment": "Negative",
+        "probability_positive": 0.000554510043002665
+      },
+      {
+        "model": "TextCNN",
+        "sentiment": "Negative",
+        "probability_positive": 5.399362635216676e-05
+      },
+      {
+        "model": "BiLSTM + Attention",
+        "sentiment": "Negative",
+        "probability_positive": 5.8944831835106015e-05
+      },
+      {
+        "model": "DistilBERT",
+        "sentiment": "Negative",
+        "probability_positive": 0.0013755169929936528
+      }
+    ]
+  },
+  "empty_review_status": 400
+}

@@ -110,3 +110,49 @@ def test_latency_small_dataset():
     result = measure_latency(MLPBoW(1, hidden=()), loader, torch.device('cpu'), amp=False)
     assert result['latency_single_samples'] == 5
     assert result['latency_ms_single_review'] > 0
+
+
+def test_glove_cache_respects_seed_and_source(tmp_path, monkeypatch):
+    from src import config as C
+    from src.glove import build_embedding_matrix
+    monkeypatch.setattr(C, 'GLOVE_DIR', tmp_path / 'cache')
+    source = tmp_path / 'glove.txt'
+    source.write_text('good 1 2 3\n', encoding='utf-8')
+    vocab = Vocab(['good unseen'])
+    first = build_embedding_matrix(vocab, source, dim=3, seed=1)
+    second = build_embedding_matrix(vocab, source, dim=3, seed=2)
+    np.testing.assert_equal(first[vocab.stoi['good']], [1, 2, 3])
+    assert not np.array_equal(first[vocab.stoi['unseen']], second[vocab.stoi['unseen']])
+    np.testing.assert_equal(first[0], [0, 0, 0])
+
+
+def test_distilbert_bundle_roundtrip_offline(tmp_path):
+    from transformers import DistilBertConfig, DistilBertTokenizerFast
+    cfg = DistilBertConfig(vocab_size=8, n_layers=1, dim=16, hidden_dim=32, n_heads=2, num_labels=1)
+    vocab_file = tmp_path / 'tokens.txt'
+    vocab_file.write_text('[PAD]\n[UNK]\n[CLS]\n[SEP]\n[MASK]\ngood\nbad\nmovie\n')
+    tok = DistilBertTokenizerFast(vocab_file=str(vocab_file))
+    model = DistilBERTClassifier(config=cfg).eval()
+    destination = tmp_path / 'bundle'
+    save_bundle(model, {'tokenizer': tok}, Namespace(model='distilbert', max_len=16), destination)
+    restored, spec, info = load_bundle(destination)
+    inputs, _ = next(iter(inference_loader(['good movie'], spec, info)))
+    torch.testing.assert_close(model(**inputs), restored(**inputs))
+
+
+def test_comparison_rejects_mixed_splits(tmp_path, monkeypatch):
+    import json
+    from src import config as C
+    from src.compare import load_results
+    monkeypatch.setattr(C, 'RESULTS_DIR', tmp_path)
+    for name, fingerprint in [('mlp', 'split-a'), ('textcnn', 'split-b')]:
+        folder = tmp_path / name
+        folder.mkdir()
+        record = {'display_name': name, 'split_fingerprint': fingerprint, 'max_len':512,
+                  'test': {'accuracy':.8, 'precision':.8, 'recall':.8, 'f1':.8},
+                  'params_total':100, 'params_trainable':100, 'train_time_s':1,
+                  'epochs_run':1, 'latency_ms_single_review':1, 'latency_ms_per_review_batched':1,
+                  'validation_f1':.8}
+        (folder/'metrics.json').write_text(json.dumps(record))
+    with pytest.raises(ValueError, match='Mixed data splits'):
+        load_results()

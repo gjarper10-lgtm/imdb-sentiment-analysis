@@ -7,9 +7,26 @@ stacked BiLSTM with attention, and fine-tuned DistilBERT under a shared evaluati
 protocol. See `docs/SYNOPSIS_CHECKLIST.txt` for the audit of the original ZIP and
 `docs/verification.json` for the actual run/test status. Missing results are never invented.
 
+## Measured results
+
+Full dataset, seed 42, 7,500 test reviews. Two learning-rate candidates per model, up to three epochs each.
+
+| Model | Accuracy | F1 |
+|---|---:|---:|
+| MLP (TF-IDF BoW) | 89.63% | 89.41% |
+| TextCNN (GloVe-300) | 89.68% | 89.77% |
+| BiLSTM + Attention (GloVe-300) | 91.52% | 91.58% |
+| DistilBERT (fine-tuned) | 93.29% | 93.30% |
+
+14 regression tests pass. Saved predictions reproduce the reported metrics, and all four bundles load for offline prediction. The cleaned data contains 424 duplicate entries, including 91 unique texts shared by train and test; this limits interpretation of the custom split scores.
+
 ## Open these first
 
-- `docs/Project_Report.docx`: methodology, measured results, tuning and error analysis.
+- **Classroom demo:** double-click `RUN_DEMO.cmd`, then open http://127.0.0.1:8765. The prepared local bundles run offline. Keep the server window open.
+- **Short presentation:** `docs/Presentation_10_Minutes.pptx` contains six slides and speaking notes for a four-minute talk.
+- **Demo + viva:** `docs/DEMO_AND_VIVA.html` and `START_HERE.txt` explain the exact steps, timing and likely questions.
+- **Complete download with trained weights:** use the ZIP asset under [GitHub Releases](https://github.com/gjarper10-lgtm/imdb-sentiment-analysis/releases). Git source downloads omit the large model weights. Install requirements once on a new machine, then run `python demo.py`.
+- `docs/Project_Report.pdf` and `docs/Project_Report.docx`: methodology, measured results, tuning and error analysis.
 - `docs/Project_Presentation.pptx`: 13 slides with results read from artifacts.
 - `results/comparison.csv`: metrics, parameter counts, training/search time and latency.
 - `results/analysis.json`: confusion counts, ROC AUC, accuracy intervals and Pareto frontiers.

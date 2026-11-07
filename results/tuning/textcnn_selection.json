@@ -1,0 +1,22 @@
+{
+  "selection_metric": "validation_f1",
+  "test_used_for_selection": false,
+  "selected": "textcnn_trial1",
+  "total_search_train_time_s": 89.4814408000093,
+  "trials": [
+    {
+      "run": "textcnn_trial1",
+      "lr": 0.001,
+      "validation_f1": 0.9019607843137255,
+      "best_epoch": 3,
+      "train_time_s": 44.00682929996401
+    },
+    {
+      "run": "textcnn_trial2",
+      "lr": 0.0003,
+      "validation_f1": 0.8841504821404319,
+      "best_epoch": 3,
+      "train_time_s": 45.474611500045285
+    }
+  ]
+}

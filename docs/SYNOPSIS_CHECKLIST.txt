@@ -43,6 +43,8 @@ Methodological clarifications:
 7. Latency excludes tokenization. All timing depends on hardware and batching.
 
 External submission work:
-The synopsis asks for a GitHub repository with commit history. Local deliverables
-do not prove publication to GitHub. A destination repository/account is needed for
-publishing; no remote URL, historic commits or submission status is fabricated.
+The synopsis asks for a GitHub repository with commit history. Genuine local
+commits preserve the supplied archive and the subsequent work. The requested
+destination is https://github.com/gjarper10-lgtm/imdb-sentiment-analysis.
+See docs/publication.json for the verified upload state. Local commits alone do
+not establish publication to GitHub.

@@ -211,7 +211,7 @@ def build():
         ("Evaluate", "MLP bag-of-words, TextCNN, BiLSTM-Attention and DistilBERT on accuracy, "
                      "F1-score and inference latency on IMDB, under one common evaluation "
                      "protocol."),
-        ("Measure", "the performance gap between models trained from scratch and a fine-tuned "
+        ("Measure", "the performance gap between non-transformer models and a fine-tuned "
                     "pre-trained transformer, and the cost-benefit trade-off in training time "
                     "and parameter count."),
     ]
@@ -259,9 +259,9 @@ def build():
     n += 1
     title(s, "One protocol for every model")
     steps = [("Clean", "lowercase, strip HTML & punctuation"),
+             ("Split", "70 / 15 / 15 stratified, seed 42"),
              ("Tokenise", "10k-word vocab from train split"),
              ("Pad", "truncate or pad to 512 tokens"),
-             ("Split", "70 / 15 / 15 stratified, seed 42"),
              ("Train", "AdamW, fp16, early stop on val F1"),
              ("Evaluate", "acc, P, R, F1, latency, params")]
     cw, gap = Inches(1.85), Inches(0.17)
@@ -283,7 +283,7 @@ def build():
     # 6. Four models
     s = new_slide(prs)
     n += 1
-    title(s, "Four architectures, increasing inductive bias")
+    title(s, "Four architectures for sentiment classification")
     models = [
         ("MLP + TF-IDF", "Classical baseline",
          "Dense 512-128 net over a 10k TF-IDF vector. Ignores word order: the performance floor."),
@@ -431,8 +431,26 @@ def build():
         va.has_major_gridlines = False
         va.tick_labels.font.size = Pt(11)
         ch.category_axis.tick_labels.font.size = Pt(12)
-        picture_or_note(s, RESULTS / "tradeoffs.png", Inches(6.7), Inches(2.3), Inches(6.0),
-                        Inches(3.4), "Trade-off plot appears after python -m src.compare")
+        cost_rows = [['Model', 'Params', 'Train min', 'Single ms']]
+        cost_rows += [[SHORT[m], f"{runs[m]['params_total']/1e6:.2f}M",
+                       f"{runs[m]['train_time_s']/60:.1f}",
+                       f"{runs[m]['latency_ms_single_review']:.2f}"] for m in ORDER]
+        cost_table = s.shapes.add_table(5, 4, Inches(6.7), Inches(2.25), Inches(6.0), Inches(2.7)).table
+        for j, width in enumerate([2.1, 1.2, 1.35, 1.35]):
+            cost_table.columns[j].width = Inches(width)
+        for i, values in enumerate(cost_rows):
+            for j, value in enumerate(values):
+                cell = cost_table.cell(i, j)
+                cell.text = value
+                cell.fill.solid()
+                cell.fill.fore_color.rgb = INK if i == 0 else MIST
+                for paragraph in cell.text_frame.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size, run.font.name = Pt(13), BODY
+                        run.font.color.rgb = PAPER if i == 0 else INK
+        text(s, Inches(6.7), Inches(5.15), Inches(6.0), Inches(1.1),
+             'Selected-trial training time. Single-review latency excludes tokenization. '
+             'Full cost plots and total search times are in the report and results files.', size=14, color=MUTED)
     else:
         picture_or_note(s, RESULTS / "tradeoffs.png", MARGIN, Inches(1.6), W - 2 * MARGIN,
                         Inches(4.9),
@@ -465,11 +483,11 @@ def build():
     n += 1
     title(s, "Conclusion and future work", dark=True)
     bullets(s, MARGIN, Inches(1.8), Inches(6.0), Inches(4.5), [
-        "Four architecture families share one preprocessing pipeline "
-        "and one evaluation harness; conclusions depend on completed runs.",
-        "The comparison quantifies what each inductive bias buys in accuracy and costs in "
-        "parameters, training time and latency.",
-        "Gives practical guidance for choosing a model under a compute budget.",
+        (f"DistilBERT led this experiment at {runs['distilbert']['test']['accuracy']*100:.2f}% test accuracy."
+         if complete else 'Results are pending completed experiments.'),
+        'The MLP offers a low compute baseline; the BiLSTM is the strongest non-transformer in this run.',
+        'One training seed and duplicate reviews across splits limit the conclusions. '
+        'A grouped split and repeated seeds are needed to assess robustness.',
     ], size=17, color=PAPER, after=14)
     text(s, Inches(7.2), Inches(1.8), Inches(5.5), Inches(0.5), "Next steps", size=21,
          bold=True, font=HEAD, color=AMBER)
@@ -500,6 +518,16 @@ def build():
          [(r, {"after": 10}) for r in refs], size=15)
     footer(s, n)
 
+    # OOXML axis IDs are unsigned integers; python-pptx's legacy defaults can be
+    # negative, which causes strict importers to reject otherwise editable charts.
+    for slide in prs.slides:
+        for shape in slide.shapes:
+            if shape.has_chart:
+                for element in shape.chart._chartSpace.iter():
+                    if element.tag.rsplit('}', 1)[-1] in ('axId', 'crossAx'):
+                        value = element.get('val')
+                        if value is not None and int(value) < 0:
+                            element.set('val', str(int(value) + 2**32))
     prs.save(OUT)
     print(f"saved {OUT}  ({n} slides; results complete: {complete}, full data: {full})")
 
